@@ -36,3 +36,22 @@ App Launch → HomeScreen (mode selection)
 - `lib/walkie_talkie_service.dart` — Walkie-Talkie Nearby Connections service
 - `lib/audio_service.dart` — Audio recording/playback service
 - `lib/haptic_feedback.dart` — Haptic feedback test widget
+
+## [Unreleased] — 2026-10-06
+
+### Added
+- **Ludo** (`lib/ludo/`) — two-player Ludo over the shared Nearby link
+  - `ludo_board.dart` — standard 15×15 board geometry (52-cell clockwise
+    track, home columns, 8 safe cells, base slots)
+  - `ludo_state.dart` — pure-Dart rules engine (base release on 6,
+    no-stacking, exact finish, captures on non-safe cells, extra turn on
+    6/capture/finish, three-six forfeit, pass, win)
+  - `ludo_service.dart` — transport on new `tagLudo = 4`; tiny JSON
+    roll/move/pass/reset payloads + version-gated state adoption for
+    self-healing resync when a peer (re)joins
+  - `ludo_screen.dart` — `CustomPainter` board, tap-to-move, dice card,
+    status card, auto/manual pass, winner overlay; all `AppTokens`
+- `lib/connection_service.dart` — `tagLudo = 4` + `sendLudo()`
+- `lib/feature_selection_screen.dart` — Ludo feature card (4th feature)
+- `test/ludo_state_test.dart` — engine, geometry and two-device sync
+  tests (run with `flutter test`)
