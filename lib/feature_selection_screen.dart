@@ -7,6 +7,7 @@ import 'package:nearby_chat_app/design_tokens.dart';
 import 'package:nearby_chat_app/main.dart' as chat;
 import 'package:nearby_chat_app/game_screen.dart';
 import 'package:nearby_chat_app/walkie_talkie_screen.dart';
+import 'package:nearby_chat_app/ludo/ludo_screen.dart';
 
 class FeatureSelectionScreen extends StatefulWidget {
   const FeatureSelectionScreen({super.key});
@@ -98,6 +99,16 @@ class _FeatureSelectionScreenState extends State<FeatureSelectionScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => GameScreen()),
+                      ),
+                    ),
+                    const SizedBox(height: AppTokens.md),
+                    _FeatureCard(
+                      icon: Icons.casino_rounded,
+                      title: 'Ludo',
+                      subtitle: 'Classic board game, two players',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LudoScreen()),
                       ),
                     ),
                   ],

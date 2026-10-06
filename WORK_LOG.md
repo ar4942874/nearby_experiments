@@ -237,3 +237,100 @@ Applied a consistent soft/clean design across every screen:
 | 5 | Reverse direction (Tecno→Vivo) | message delivered | ✅ "TecnoToVivo" received in Vivo chat |
 
 Logs confirmed: `Global chat received` / `Chat UI received` / `Showing notification` in the correct scenarios only.
+
+---
+
+## Work Log — 2026-10-06 — Ludo Integration (4th feature)
+
+### 17. Ludo — two-player board game over the shared link
+
+Goal: add Ludo as a fourth feature, cleanly integrated into the existing
+shared-`ConnectionService` architecture (no link ownership, no UI changes
+to other features).
+
+**Board geometry — `lib/ludo/ludo_board.dart` (new)**
+- Standard 15×15 grid; the 52-cell main track is a clockwise loop of
+  `(row, col)` cells (verified: 52 unique cells, all inside the cross,
+  consecutive cells adjacent except the four classic "elbow" turns that
+  wrap the centre block).
+- 2-player mode: player 0 (host) top-left, player 1 (guest) bottom-right;
+  starts 13 cells apart (4 × 13 = 52) so the game is symmetric.
+- Home columns (5 cells each), 8 safe/star cells (4 starts + 4 stars),
+  base parking slots, helpers `absoluteOf` / `cellOf` / `isSafe`.
+
+**Rules engine — `lib/ludo/ludo_state.dart` (new, pure Dart, no Flutter)**
+- Piece positions are player-relative: -1 base, 0–50 track, 51–55 home
+  column, 56 finished.
+- Full rule set: 6 to leave base (start cell must be free — no stacking),
+  no stacking anywhere (track + home column), exact roll to finish,
+  captures on non-safe cells (sent back to base), extra turn on 6 /
+  capture / piece finished, three consecutive sixes forfeits the turn,
+  pass when no legal move, win when all 4 home.
+- Deterministic: both devices run the same engine and apply the same
+  actions in the same order → states stay in sync without sending the
+  board.
+- `version` (action counter, cleared on reset) + `toJson/fromJson` for
+  resync.
+
+**Transport — `lib/ludo/ludo_service.dart` (new)**
+- Mirrors `NearbyService`: wrapper over `ConnectionService` on the new
+  `tagLudo = 4` channel; `stateStream` / `statusStream` /
+  `discoveryStream`; `dispose()` does NOT disconnect.
+- Wire protocol (tiny JSON payloads):
+  - `{"type":"roll","player","dice"}` — dice rolled by the actor;
+  - `{"type":"move","player","piece","dice"}`;
+  - `{"type":"pass","player"}`;
+  - `{"type":"reset"}`;
+  - `{"type":"state","v","state"}` — full snapshot.
+- Self-healing resync: on entering the connection the service resets
+  locally and broadcasts its state; the peer adopts it only when its
+  version is newer. So a peer that stayed in the game (higher version)
+  corrects a re-entering peer automatically; rejected remote actions
+  also trigger a state offer.
+- Known edge (documented, trivially recoverable): a peer "New game"
+  reset racing a local action within the same tick can leave versions
+  equal-but-divergent; tapping "New game" once more re-syncs both sides.
+
+**UI — `lib/ludo/ludo_screen.dart` (new)**
+- `CustomPainter` board on the 15×15 grid: bases with 4 parking slots,
+  52 track cells (colored start cells with white stars, gray stars on
+  safe cells), colored home columns, 4-triangle center (player home
+  triangles teal / charcoal), finished pieces inside the triangles.
+- Pieces: white-rimmed circles; legal moves get a highlight ring; two
+  pieces sharing a safe cell render side-by-side.
+- Tap-to-move on highlighted pieces; dice card with pips; status card
+  (turn + x/4 home per player); auto-pass after 1.6 s when no legal
+  move (manual "Pass turn" button also available); winner overlay with
+  "Play again"; not-connected placeholder matching the other screens.
+- All colors from `AppTokens` (player colors = accent + text — stays
+  inside the 3-hue palette).
+
+**Wiring**
+- `lib/connection_service.dart`: `tagLudo = 4` + `sendLudo()`.
+- `lib/feature_selection_screen.dart`: fourth feature card (Ludo).
+
+**Tests — `test/ludo_state_test.dart` (new)**
+- Geometry invariants (52 unique adjacent cells, 4 elbows, start
+  spacing, home-column adjacency).
+- Rules: base release on 6 (+ occupied start cell), exact finish,
+  no-stacking (track + home column), captures, safe cells, extra turns,
+  three-six forfeit, pass rules, win, JSON round trip.
+- Two-device simulation: a full seeded random game applying the same
+  JSON payloads to two engines — asserts no desync after every action;
+  plus version-adoption cases (late joiner adopts newer state, older
+  state never overwrites).
+- Run with `flutter test` (no Flutter SDK in this sandbox — tests were
+  reviewed, not executed, here).
+
+### Files Modified / Created (this phase)
+
+| File | Change |
+|------|--------|
+| `lib/ludo/ludo_board.dart` | **new** — 15×15 board geometry + helpers |
+| `lib/ludo/ludo_state.dart` | **new** — pure-Dart Ludo rules engine |
+| `lib/ludo/ludo_service.dart` | **new** — tag-4 transport + version resync |
+| `lib/ludo/ludo_screen.dart` | **new** — painter board + game UI |
+| `test/ludo_state_test.dart` | **new** — engine + sync test suite |
+| `lib/connection_service.dart` | `tagLudo = 4` + `sendLudo()` |
+| `lib/feature_selection_screen.dart` | Ludo feature card |
+| `WORK_LOG.md` | this entry |

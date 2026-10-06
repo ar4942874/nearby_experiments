@@ -70,7 +70,8 @@ class AppPayload {
   String get text => utf8.decode(body);
 }
 
-/// The one Nearby connection shared by Chat, Walkie Talkie and Tic-Tac-Toe.
+/// The one Nearby connection shared by Chat, Walkie Talkie, Tic-Tac-Toe
+/// and Ludo.
 ///
 /// All features talk through this singleton: one serviceId, one
 /// advertising/discovery session, one link. Every payload is framed as
@@ -86,6 +87,7 @@ class ConnectionService {
   static const int tagChat = 1;
   static const int tagGame = 2;
   static const int tagAudio = 3;
+  static const int tagLudo = 4;
 
   final Nearby _nearby = Nearby();
 
@@ -410,4 +412,7 @@ class ConnectionService {
       _sendTagged(tagGame, Uint8List.fromList(utf8.encode(json)));
 
   Future<void> sendAudio(Uint8List audio) => _sendTagged(tagAudio, audio);
+
+  Future<void> sendLudo(String json) =>
+      _sendTagged(tagLudo, Uint8List.fromList(utf8.encode(json)));
 }
