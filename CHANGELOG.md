@@ -55,3 +55,31 @@ App Launch → HomeScreen (mode selection)
 - `lib/feature_selection_screen.dart` — Ludo feature card (4th feature)
 - `test/ludo_state_test.dart` — engine, geometry and two-device sync
   tests (run with `flutter test`)
+
+## [Unreleased] — 2026-10-07
+
+### Changed
+- **Ludo redesign** — game code moved to `lib/games/ludo/` (from `lib/ludo/`)
+  - Board now sits in a white card (radius 24, hairline border, soft
+    shadow, 12px inner pad); track/home-column cells are rounder; unused
+    bases tinted `background` so they read as out-of-play
+  - Movable pieces pulse (1.2s attention cue) and each shows a soft
+    landing-spot ring — tapping the landing spot moves the piece too
+  - Dice card: tumbles 400ms before settling (haptic tick), shows the
+    last roll dimmed while the next roll is pending
+  - Status bar: two player plates (color dot, name, 4 progress pips)
+    that light up on the active player's turn
+  - Captures, pieces home and three-six forfeits called out on the
+    status line with matching haptics
+  - "New game" moved to the app bar; winner overlay animates in
+  - Player colors tokenized (`AppTokens.player0/player1` + tints)
+- `lib/design_tokens.dart` — game tokens: `player0` / `player1` colors
+  and tints, `radiusBoard`, `motionSlow`, `motionPulse`
+- `lib/feature_selection_screen.dart` — import path only
+- `test/ludo_state_test.dart` — import paths only
+
+### Docs
+- `DESIGN.md` — player color aliases, `GameBoard` / `PlayerPlate`
+  components, motion amendments for game feedback
+- `README.md` — real project description + feature list
+- `WORK_LOG.md` — session entry for the redesign

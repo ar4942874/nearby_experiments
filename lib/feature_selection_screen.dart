@@ -7,7 +7,7 @@ import 'package:nearby_chat_app/design_tokens.dart';
 import 'package:nearby_chat_app/main.dart' as chat;
 import 'package:nearby_chat_app/game_screen.dart';
 import 'package:nearby_chat_app/walkie_talkie_screen.dart';
-import 'package:nearby_chat_app/ludo/ludo_screen.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_screen.dart';
 
 class FeatureSelectionScreen extends StatefulWidget {
   const FeatureSelectionScreen({super.key});

@@ -334,3 +334,86 @@ to other features).
 | `lib/connection_service.dart` | `tagLudo = 4` + `sendLudo()` |
 | `lib/feature_selection_screen.dart` | Ludo feature card |
 | `WORK_LOG.md` | this entry |
+
+---
+
+## Work Log — 2026-10-07 — Ludo redesign
+
+### 18. Ludo redesign (visual pass + `lib/games/ludo/` structure)
+
+Goal: give Ludo the same polish as the rest of the app, and move the
+game under `lib/games/` so future games have a home. The rules engine,
+the wire protocol and `ConnectionService` are untouched — this is a UI
+and structure change only.
+
+Note: this entry recreates a local commit (`d9d3e05`) that was lost
+when the sandbox re-cloned (the commit had never been pushed). The
+engine/service semantics are exactly as shipped in PR #1.
+
+**Structure — `lib/ludo/` → `lib/games/ludo/`**
+- `git mv` of the four files; `ludo_service.dart` /
+  `ludo_screen.dart` / `feature_selection_screen.dart` /
+  `test/ludo_state_test.dart` imports updated. `ludo_state.dart`
+  already imported `ludo_board.dart` relatively, so it moved as-is.
+
+**Tokens — `lib/design_tokens.dart`**
+- `player0` / `player1` + tints: semantic aliases so game code (and
+  the painter) never hardcodes a player hue — host = teal, guest =
+  charcoal, both inside the 3-color palette.
+- `radiusBoard = 24`, `motionSlow = 400ms` (transient game feedback),
+  `motionPulse = 1200ms` (the one sanctioned looping cue).
+
+**Screen — `lib/games/ludo/ludo_screen.dart` (redesigned)**
+- Board card: the 15×15 grid now sits inside a white card (hairline
+  border + the standard card shadow) with 12px inner padding, so the
+  board reads as a physical object instead of floating on the
+  background. Unused bases tinted `background` (out-of-play), player
+  bases keep their tinted yard + white inner panel + four circular
+  docks, track/home cells are rounder (0.22 cell).
+- Movable-piece affordances: movable pieces pulse (1.2s reverse loop,
+  driven by an `AnimationController` piped into the painter) and each
+  one's landing spot gets a soft ring (player color at 10% fill / 45%
+  stroke). Tapping either the piece or the landing spot moves it —
+  landing rings are painted above pieces so a capturable opponent
+  piece reads as targeted.
+- Dice: tumbles for 400ms on every new roll (two full face cycles via
+  `AnimatedBuilder`, slight scale pop, haptic tick on settle) and
+  shows the last roll dimmed while the next roll is pending; "?" only
+  before the first roll of a session.
+- Status bar: two `PlayerPlate`s (10px color dot, name, four 7px
+  progress pips) that light up with the active player's tint +
+  45% player-color border (`AnimatedContainer`, 200ms); turn
+  instruction centered underneath.
+- Event callouts: the screen diffs consecutive engine states and
+  surfaces captures ("You captured a piece — roll again" / "Peer
+  captured your piece"), pieces home and three-six forfeits on the
+  status line for ~2.4s, with haptics (medium on capture, light on
+  finish/forfeit, heavy on game over).
+- Chrome: "New game" moved into the app bar (tooltip), freeing a full
+  row for the board; winner overlay fades/scales in over 400ms;
+  stream subscriptions are now stored and cancelled on dispose.
+
+**Docs**
+- `DESIGN.md`: player color aliases (§1), `GameBoard` / `PlayerPlate`
+  components (§5), motion amendments — transient game feedback up to
+  400ms + the single looping pulse cue (§6).
+- `CHANGELOG.md`: 2026-10-07 section. `README.md`: real description.
+
+**Verification**
+- No Flutter SDK in this sandbox — `flutter analyze` / `flutter test`
+  could not run here (same as the PR #1 session). The pure-Dart engine
+  is unchanged and covered by `test/ludo_state_test.dart`; the UI pass
+  was reviewed against the widget APIs it uses.
+
+### Files Modified / Created (this phase)
+
+| File | Change |
+|------|--------|
+| `lib/games/ludo/` | **moved** from `lib/ludo/` (4 files) |
+| `lib/games/ludo/ludo_screen.dart` | redesigned (board card, pulse + landing spots, tumbling dice, player plates, event callouts) |
+| `lib/games/ludo/ludo_service.dart` | import path only |
+| `lib/design_tokens.dart` | game tokens (players, radiusBoard, motionSlow, motionPulse) |
+| `lib/feature_selection_screen.dart` | import path only |
+| `test/ludo_state_test.dart` | import paths only |
+| `DESIGN.md` | player aliases, game components, motion amendments |
+| `CHANGELOG.md` / `README.md` / `WORK_LOG.md` | documented |

@@ -69,7 +69,10 @@ Screen horizontal padding: 24px (home) / 16px (dense screens). Card padding: 20p
 
 - Implicit animations only, 200ms ease (talk button scale/color).
 - No page transition customization; rely on Material defaults.
-- No parallax, no looping animations, no shimmer.
+- No parallax, no shimmer.
+- Games only: transient feedback up to 400ms ease-out (dice tumble, winner
+  overlay entrance) and exactly one looping attention cue — the movable-piece
+  pulse, 1.2s reverse, inside the game board. No other looping animation.
 
 ## 7. Voice
 

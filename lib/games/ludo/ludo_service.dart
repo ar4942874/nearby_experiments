@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:nearby_chat_app/connection_service.dart';
-import 'package:nearby_chat_app/ludo/ludo_state.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_state.dart';
 
 /// Ludo transport. Thin wrapper over the shared [ConnectionService] on
 /// [ConnectionService.tagLudo]: it keeps its own game streams but never

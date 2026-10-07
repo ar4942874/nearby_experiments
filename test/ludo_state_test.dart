@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nearby_chat_app/ludo/ludo_board.dart';
-import 'package:nearby_chat_app/ludo/ludo_state.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_board.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_state.dart';
 
 void main() {
   // ------------------------------------------------------------ geometry
