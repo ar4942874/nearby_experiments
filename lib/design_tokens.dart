@@ -18,6 +18,14 @@ class AppTokens {
   static Color accentWith(double opacity) => accent.withOpacity(opacity);
   static Color dangerWith(double opacity) => danger.withOpacity(opacity);
 
+  // 1b. Game player aliases — semantic names for the two Ludo sides.
+  // Both stay inside the 3-hue palette (teal = host, charcoal = guest),
+  // so game code never hardcodes a player hue.
+  static const Color player0 = accent; // host pieces / plates / home column
+  static const Color player1 = text; // guest pieces / plates / home column
+  static const Color player0Tint = tint;
+  static final Color player1Tint = text.withOpacity(0.06);
+
   // 3. Spacing (4px grid)
   static const double xs = 4;
   static const double sm = 8;
