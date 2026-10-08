@@ -8,6 +8,9 @@ import 'package:nearby_chat_app/main.dart' as chat;
 import 'package:nearby_chat_app/game_screen.dart';
 import 'package:nearby_chat_app/walkie_talkie_screen.dart';
 import 'package:nearby_chat_app/games/ludo/ludo_screen.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_bot.dart';
+import 'package:nearby_chat_app/games/ludo/ludo_bot_setup_dialog.dart';
+import 'package:nearby_chat_app/games/ludo/local_ludo_service.dart';
 
 class FeatureSelectionScreen extends StatefulWidget {
   const FeatureSelectionScreen({super.key});
@@ -35,6 +38,27 @@ class _FeatureSelectionScreenState extends State<FeatureSelectionScreen> {
         );
       }
     });
+  }
+
+  void _showBotSetup(BuildContext context) async {
+    final result = await showDialog<(int, BotDifficulty)>(
+      context: context,
+      builder: (_) => const LudoBotSetupDialog(),
+    );
+    if (result != null && context.mounted) {
+      final (botCount, difficulty) = result;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LudoScreen(
+            localService: LocalLudoService(
+              botCount: botCount,
+              difficulty: difficulty,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -110,6 +134,13 @@ class _FeatureSelectionScreenState extends State<FeatureSelectionScreen> {
                         context,
                         MaterialPageRoute(builder: (_) => const LudoScreen()),
                       ),
+                    ),
+                    const SizedBox(height: AppTokens.md),
+                    _FeatureCard(
+                      icon: Icons.smart_toy_rounded,
+                      title: 'Ludo (Solo)',
+                      subtitle: 'Play against 1–3 bots',
+                      onTap: () => _showBotSetup(context),
                     ),
                   ],
                 ),

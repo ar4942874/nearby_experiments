@@ -18,13 +18,45 @@ class AppTokens {
   static Color accentWith(double opacity) => accent.withOpacity(opacity);
   static Color dangerWith(double opacity) => danger.withOpacity(opacity);
 
-  // 1b. Game player aliases — semantic names for the two Ludo sides.
-  // Both stay inside the 3-hue palette (teal = host, charcoal = guest),
-  // so game code never hardcodes a player hue.
-  static const Color player0 = accent; // host pieces / plates / home column
-  static const Color player1 = text; // guest pieces / plates / home column
-  static const Color player0Tint = tint;
-  static final Color player1Tint = text.withOpacity(0.06);
+  // 1b. Game player aliases — 4-player color palette.
+  // Player 0 (Top-Left): Emerald Teal — host
+  // Player 1 (Top-Right): Crimson Coral
+  // Player 2 (Bottom-Right): Royal Indigo
+  // Player 3 (Bottom-Left): Warm Amber
+  static const Color player0 = Color(0xFF3A7D6E);
+  static const Color player1 = Color(0xFFE05A47);
+  static const Color player2 = Color(0xFF4A6FA5);
+  static const Color player3 = Color(0xFFD99B26);
+  static const Color player0Tint = Color(0xFFE8F5F3);
+  static const Color player1Tint = Color(0xFFFDEEEB);
+  static const Color player2Tint = Color(0xFFEDF1F8);
+  static const Color player3Tint = Color(0xFFFBF3E4);
+
+  static Color playerColor(int p) {
+    switch (p) {
+      case 1:
+        return player1;
+      case 2:
+        return player2;
+      case 3:
+        return player3;
+      default:
+        return player0;
+    }
+  }
+
+  static Color playerTint(int p) {
+    switch (p) {
+      case 1:
+        return player1Tint;
+      case 2:
+        return player2Tint;
+      case 3:
+        return player3Tint;
+      default:
+        return player0Tint;
+    }
+  }
 
   // 3. Spacing (4px grid)
   static const double xs = 4;
@@ -41,6 +73,7 @@ class AppTokens {
   static const double radiusChatInput = 28;
   static const double radiusBubble = 20;
   static const double radiusIconBox = 14;
+  static const double radiusBoard = 24;
 
   // 5. Borders & shadow
   static const BorderSide hairline = BorderSide(color: border, width: 1);
@@ -97,6 +130,8 @@ class AppTokens {
 
   // 6. Motion
   static const Duration motion = Duration(milliseconds: 200);
+  static const Duration motionSlow = Duration(milliseconds: 400);
+  static const Duration motionPulse = Duration(milliseconds: 800);
 
   // Shared component builders
   static BoxDecoration cardDecoration({double radius = radiusCard, Color fill = surface}) =>

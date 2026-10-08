@@ -6,6 +6,16 @@ import 'package:nearby_chat_app/games/ludo/ludo_board.dart';
 import 'package:nearby_chat_app/games/ludo/ludo_state.dart';
 
 void main() {
+  // -------------------------------------------------------------- helpers
+
+  /// Places a player's pieces at the given relative positions, skipping the
+  /// normal turn flow (test setup only). Unlisted pieces stay in base.
+  void forceRel(LudoState s, int player, List<int> rels) {
+    for (var i = 0; i < LudoBoard.piecesPerPlayer; i++) {
+      s.pieces[player][i] = i < rels.length ? rels[i] : LudoState.posBase;
+    }
+  }
+
   // ------------------------------------------------------------ geometry
 
   group('LudoBoard geometry', () {
@@ -45,13 +55,13 @@ void main() {
     });
 
     test('player starts are 13 cells apart (opposite corners)', () {
-      expect(LudoBoard.startIndex[1] - LudoBoard.startIndex[0], 13);
+      expect(LudoBoard.startIndex[1] - LudoBoard.startIndex[0], 26);
     });
 
     test('home column entrance is adjacent to the last track cell', () {
       // Relative 50 (last track cell) must be adjacent to home column cell 0.
       for (final p in const [0, 1]) {
-        final last = LudoBoard.cellOf(p, 50);
+        final last = LudoBoard.cellOf(p, 50)!;
         final home0 = LudoBoard.homeCols[p][0];
         expect(
           (last[0] - home0[0]).abs() + (last[1] - home0[1]).abs(),
@@ -176,7 +186,7 @@ void main() {
 
     test('exact roll required to finish', () {
       final s = LudoState();
-      _forceRel(s, 0, [55]); // last home-column cell
+      forceRel(s, 0, [55]); // last home-column cell
       s.currentPlayer = 0;
 
       s.roll(0, 1);
@@ -185,7 +195,7 @@ void main() {
       expect(s.pieces[0][0], LudoState.posHome);
 
       final t = LudoState();
-      _forceRel(t, 0, [55]);
+      forceRel(t, 0, [55]);
       t.currentPlayer = 0;
       t.roll(0, 2);
       expect(t.movablePieces(0), isEmpty,
@@ -194,7 +204,7 @@ void main() {
 
     test('own piece blocks the target track cell (no stacking)', () {
       final s = LudoState();
-      _forceRel(s, 0, [0, 5]); // siblings at rel 0 and rel 5
+      forceRel(s, 0, [0, 5]); // siblings at rel 0 and rel 5
       s.currentPlayer = 0;
       s.roll(0, 5);
       // Piece at 0 cannot land on the occupied cell 5; the piece at 5 can.
@@ -203,7 +213,7 @@ void main() {
 
     test('own piece blocks the home column too', () {
       final s = LudoState();
-      _forceRel(s, 0, [52, 47]);
+      forceRel(s, 0, [52, 47]);
       s.currentPlayer = 0;
       s.roll(0, 5);
       expect(s.movablePieces(0), isEmpty,
@@ -233,8 +243,8 @@ void main() {
   group('Captures', () {
     test('landing on an opponent sends it back and grants an extra turn', () {
       final s = LudoState();
-      _forceRel(s, 1, 1); // player 1 on absolute 27 (not safe)
-      _forceRel(s, 0, 24); // player 0 three cells behind absolute 27
+      forceRel(s, 1, [1]); // player 1 on absolute 27 (not safe)
+      forceRel(s, 0, [24]); // player 0 three cells behind absolute 27
       expect(LudoBoard.absoluteOf(1, 1), 27);
       expect(LudoBoard.isSafe(27), false);
 
@@ -249,9 +259,9 @@ void main() {
 
     test('no capture on safe (star) cells', () {
       final s = LudoState();
-      _forceRel(s, 1, 34); // absolute 26 + 34 = 8 (safe star)
+      forceRel(s, 1, [34]); // absolute 26 + 34 = 8 (safe star)
       expect(LudoBoard.isSafe(LudoBoard.absoluteOf(1, 34)), true);
-      _forceRel(s, 0, 5);
+      forceRel(s, 0, [5]);
       s.currentPlayer = 0;
       s.roll(0, 3); // lands on absolute 8
       expect(s.move(0, 0, 3), true);
@@ -265,8 +275,8 @@ void main() {
       expect(LudoBoard.absoluteOf(0, 8), 8);
       expect(LudoBoard.absoluteOf(1, 34), 8);
       final s = LudoState();
-      _forceRel(s, 0, [8]);
-      _forceRel(s, 1, [34]);
+      forceRel(s, 0, [8]);
+      forceRel(s, 1, [34]);
       expect(s.pieces[0][0], 8);
       expect(s.pieces[1][0], 34);
     });
@@ -319,7 +329,7 @@ void main() {
 
     test('bringing a piece home grants an extra turn', () {
       final s = LudoState();
-      _forceRel(s, 0, [55]);
+      forceRel(s, 0, [55]);
       s.currentPlayer = 0;
       s.roll(0, 1);
       expect(s.move(0, 0, 1), true);
@@ -334,7 +344,7 @@ void main() {
   group('Winning', () {
     test('all four pieces home wins the game', () {
       final s = LudoState();
-      _forceRel(s, 0, [55, 55, 55, 55]);
+      forceRel(s, 0, [55, 55, 55, 55]);
       s.currentPlayer = 0;
       for (var i = 0; i < 4; i++) {
         s.roll(0, 1);
@@ -347,7 +357,7 @@ void main() {
 
     test('no further actions after the game is over', () {
       final s = LudoState();
-      _forceRel(s, 0, [55, 55, 55, 55]);
+      forceRel(s, 0, [55, 55, 55, 55]);
       s.currentPlayer = 0;
       for (var i = 0; i < 4; i++) {
         s.roll(0, 1);
@@ -496,11 +506,4 @@ void main() {
 
   // -------------------------------------------------------------- helpers
 
-  /// Places a player's pieces at the given relative positions, skipping the
-  /// normal turn flow (test setup only). Unlisted pieces stay in base.
-  void _forceRel(LudoState s, int player, List<int> rels) {
-    for (var i = 0; i < LudoBoard.piecesPerPlayer; i++) {
-      s.pieces[player][i] = i < rels.length ? rels[i] : LudoState.posBase;
-    }
-  }
 }

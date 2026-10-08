@@ -193,13 +193,14 @@ class LudoService {
 
   /// Rolls the dice (only when it is this player's turn to roll).
   Future<bool> rollDice(int value) async {
-    if (_myPlayer == null || !_conn.isConnected) return false;
-    if (!_state.roll(_myPlayer, value)) return false;
+    final player = _myPlayer;
+    if (player == null || !_conn.isConnected) return false;
+    if (!_state.roll(player, value)) return false;
     _emitState();
     try {
       await _conn.sendLudo(jsonEncode({
         'type': 'roll',
-        'player': _myPlayer,
+        'player': player,
         'dice': value,
       }));
     } catch (_) {}
@@ -208,15 +209,16 @@ class LudoService {
 
   /// Moves [piece] with the pending dice value.
   Future<bool> movePiece(int piece) async {
-    if (_myPlayer == null || !_conn.isConnected) return false;
+    final player = _myPlayer;
+    if (player == null || !_conn.isConnected) return false;
     final dice = _state.dice;
     if (dice == null) return false;
-    if (!_state.move(_myPlayer, piece, dice)) return false;
+    if (!_state.move(player, piece, dice)) return false;
     _emitState();
     try {
       await _conn.sendLudo(jsonEncode({
         'type': 'move',
-        'player': _myPlayer,
+        'player': player,
         'piece': piece,
         'dice': dice,
       }));
@@ -226,11 +228,12 @@ class LudoService {
 
   /// Passes the turn (only valid when no piece can legally move).
   Future<bool> passTurn() async {
-    if (_myPlayer == null || !_conn.isConnected) return false;
-    if (!_state.pass(_myPlayer)) return false;
+    final player = _myPlayer;
+    if (player == null || !_conn.isConnected) return false;
+    if (!_state.pass(player)) return false;
     _emitState();
     try {
-      await _conn.sendLudo(jsonEncode({'type': 'pass', 'player': _myPlayer}));
+      await _conn.sendLudo(jsonEncode({'type': 'pass', 'player': player}));
     } catch (_) {}
     return true;
   }
